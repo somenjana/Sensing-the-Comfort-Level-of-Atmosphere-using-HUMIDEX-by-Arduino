@@ -1,0 +1,87 @@
+//* Representing the comfort level by blinking of LED using HUMIDEX by DHT22 sensor and arduino Uno.
+
+//Libraries
+#include <DHT.h>;
+#include <math.h>
+
+//Constants
+#define DHTPIN 7     // what pin we're connected to
+#define DHTTYPE DHT22   // DHT 22  (AM2302)
+
+DHT dht(DHTPIN, DHTTYPE); //// Initialize DHT sensor for normal 16mhz Arduino
+
+
+//Variables
+
+double hum;  //Stores humidity value
+double temp; //Stores temperature value
+double B; // Stores the value of intermediate parameter.
+double dew; // Stores the value of Dew temperature
+long humidex; // Stores the value of HUMIDEX
+const int LED1 = 02; // White LED connected to digital pin 2
+const int LED2 = 04; // Blue LED connected to digital pin 4
+const int LED3 = 06; // Green LED connected to digital pin 6
+const int LED4 = 10; // Yellow LED connected to digital pin 8
+const int LED5 = 12; // Red LED connected to digital pin 10
+
+void setup()
+{
+ 
+ dht.begin();
+ pinMode(LED1, OUTPUT); // sets the digital pin as output
+ pinMode(LED2, OUTPUT); // sets the digital pin as output
+ pinMode(LED3, OUTPUT); // sets the digital pin as output
+ pinMode(LED4, OUTPUT); // sets the digital pin as output
+ pinMode(LED5, OUTPUT); // sets the digital pin as output
+}
+
+void loop()
+{
+    delay(2000);
+    //Read data and store it to variables hum and temp
+    hum = dht.readHumidity();
+    temp= dht.readTemperature();
+    B=(log(hum/100)+((17.27*temp)/(237.3+temp)))/17.27; // value of "B", the intermediate dimentionless parameter has been calculated.
+    dew=(237.3*B)/(1-B); // The value of dew point has been calculated
+    humidex=temp+0.5555*(6.11*exp(5417.753*(1/273.16-1/(273.15+dew)))-10); // the value of HUMIDEX has been claculated.
+    
+    if (humidex<0){ // the situation when sensor is not working ! i.e NaN is coming out of the humidity and temperature value.
+      digitalWrite(LED1, HIGH); // turns the Green LED (numbered as 1) on
+      delay(1000); // wait for 1 sec
+      digitalWrite(LED1, LOW); // turns the Green LED (numbered as 1) off
+      digitalWrite(LED2, HIGH); // turns the white LED (numbered as 1) on
+      delay(1000); // wait for 1 sec
+      digitalWrite(LED2, LOW); // turns the White LED (numbered as 1) off
+      digitalWrite(LED3, HIGH); // turns the yellow LED (numbered as 1) on
+      delay(1000); // wait for 1 sec
+      digitalWrite(LED3, LOW); // turns the yellow LED (numbered as 1) off
+    }
+    
+    else if (humidex>=0 && humidex <20){
+      digitalWrite(LED1, HIGH); // turns the green LED (numbered as 1) on
+      delay(5000); // wait for 5 sec
+      digitalWrite(LED1, LOW); // turns the green LED (numbered as 1) off
+       }
+    else if (humidex>=20 && humidex <30){
+      digitalWrite(LED2, HIGH); // turns the White LED (numbered as 2) on
+      delay(5000); // wait for 5 sec
+      digitalWrite(LED2, LOW); // turns the white LED (numbered as 2) off
+    }
+    else if (humidex>=30 && humidex <40){
+      digitalWrite(LED3, HIGH); // turns the Yellow LED (numbered as 3) on
+      delay(5000); // wait for 5 sec
+      digitalWrite(LED3, LOW); // turns the Yellow LED (numbered as 3) off
+    }
+    else if (humidex>=40 && humidex <45){
+       digitalWrite(LED4, HIGH); // turns the blue LED (numbered as 4) on
+      delay(5000); // wait for 5 sec
+      digitalWrite(LED4, LOW); // turns the blue LED (numbered as 4) off
+    }
+    
+    else {
+       digitalWrite(LED5, HIGH); // turns the red LED (numbered as 5) on
+      delay(5000); // wait for 5 sec
+      digitalWrite(LED5, LOW); // turns the red LED (numbered as 5) off
+          }
+      }  
+
